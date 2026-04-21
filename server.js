@@ -4,6 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const http = require('http');
 const { Server } = require('socket.io');
+const simpleGit = require('simple-git');
 
 const app = express();
 const server = http.createServer(app);
@@ -742,6 +743,50 @@ setInterval(() => {
     WHERE energy < maxEnergy
   `);
 }, 600000);
+
+// ========== Git синхронизация ==========
+const git = simpleGit();
+
+// Настроим git с учетными данными для Render
+(async () => {
+  try {
+    if (process.env.GIT_TOKEN) {
+      await git.addConfig('user.email', 'render@example.com');
+      await git.addConfig('user.name', 'Render Auto-Sync');
+      console.log('Git configured with token');
+    } else {
+      console.warn('GIT_TOKEN not set - auto-sync to GitHub will not work');
+    }
+  } catch (err) {
+    console.warn('Git config warning:', err.message);
+  }
+})();
+
+let lastSyncTime = Date.now();
+const SYNC_INTERVAL = 30000; // Синхронизация каждые 30 секунд
+
+async function syncToGitHub() {
+  try {
+    const status = await git.status();
+    if (status.files.length > 0) {
+      await git.add(['db.sqlite']);
+      await git.commit(`Auto-sync database - ${new Date().toISOString()}`);
+      await git.push('origin', 'main');
+      console.log('Database synced to GitHub');
+    }
+  } catch (err) {
+    console.error('Git sync error:', err.message);
+  }
+}
+
+// Синхронизация каждые 30 секунд
+setInterval(() => {
+  const now = Date.now();
+  if (now - lastSyncTime >= SYNC_INTERVAL) {
+    syncToGitHub();
+    lastSyncTime = now;
+  }
+}, 5000);
 
 // Socket.io
 io.on('connection', (socket) => {
