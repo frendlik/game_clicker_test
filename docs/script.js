@@ -1,4 +1,9 @@
-const socket = io();
+// Конфигурация API
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : 'https://YOUR_RENDER_URL.onrender.com'; // Замените на ваш URL с Render
+
+const socket = io(API_URL);
 
 let userData = {};
 let shopItems = [];
@@ -120,7 +125,7 @@ function updateUI() {
 }
 
 async function loadUser() {
-    const res = await fetch('/api/user', { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/user`, { credentials: 'include' });
     if (res.ok) {
         userData = await res.json();
         updateUI();
@@ -154,7 +159,7 @@ function updateLeaderboardTables(data) {
 }
 
 async function loadLeaderboard() {
-    const res = await fetch('/api/leaderboard');
+    const res = await fetch(`${API_URL}/api/leaderboard`);
     if (res.ok) {
         const data = await res.json();
         updateLeaderboardTables(data);
@@ -162,7 +167,7 @@ async function loadLeaderboard() {
 }
 
 async function loadShop() {
-    const res = await fetch('/api/items');
+    const res = await fetch(`${API_URL}/api/items`);
     if (res.ok) {
         shopItems = await res.json();
         renderShop();
@@ -187,7 +192,7 @@ function renderShop() {
     document.querySelectorAll('.buy-item').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const itemId = e.target.dataset.itemId;
-            const res = await fetch('/api/buyItem', {
+            const res = await fetch(`${API_URL}/api/buyItem`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ itemId }),
@@ -207,7 +212,7 @@ function renderShop() {
 }
 
 async function loadInventory() {
-    const res = await fetch('/api/inventory', { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/inventory`, { credentials: 'include' });
     if (res.ok) {
         inventory = await res.json();
         renderInventory();
@@ -226,7 +231,7 @@ function renderInventory() {
     document.querySelectorAll('.use-item').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const itemId = e.target.dataset.itemId;
-            const res = await fetch('/api/useItem', {
+            const res = await fetch(`${API_URL}/api/useItem`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ itemId }),
@@ -249,7 +254,7 @@ function renderInventory() {
 }
 
 async function loadAchievements() {
-    const res = await fetch('/api/achievements');
+    const res = await fetch(`${API_URL}/api/achievements`);
     if (res.ok) {
         achievements = await res.json();
         renderAchievements();
@@ -319,7 +324,7 @@ function showAuth() {
 registerBtn.addEventListener('click', async () => {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const res = await fetch('/register', {
+    const res = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -340,7 +345,7 @@ loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const res = await fetch('/login', {
+    const res = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -369,7 +374,7 @@ logoutBtn.addEventListener('click', async () => {
 
 // ========== Игровые действия ==========
 clickBtn.addEventListener('click', async () => {
-    const res = await fetch('/api/click', {
+    const res = await fetch(`${API_URL}/api/click`, {
         method: 'POST',
         credentials: 'include'
     });
@@ -391,7 +396,7 @@ transferBtn.addEventListener('click', async () => {
         transferMessage.textContent = 'Заполните все поля';
         return;
     }
-    const res = await fetch('/api/transfer', {
+    const res = await fetch(`${API_URL}/api/transfer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ toUsername, amount }),
@@ -414,7 +419,7 @@ transferBtn.addEventListener('click', async () => {
 document.querySelectorAll('.pvp-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
         const botType = e.target.dataset.bot;
-        const res = await fetch('/api/pvp', {
+        const res = await fetch(`${API_URL}/api/pvp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ botType }),
@@ -459,7 +464,7 @@ document.querySelectorAll('.pvp-btn').forEach(btn => {
 document.querySelectorAll('.buy-auto').forEach(btn => {
     btn.addEventListener('click', async (e) => {
         const type = e.target.dataset.type;
-        const res = await fetch('/api/buyAuto', {
+        const res = await fetch(`${API_URL}/api/buyAuto`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type }),
@@ -482,7 +487,7 @@ document.querySelectorAll('.buy-auto').forEach(btn => {
 document.querySelectorAll('.buy-upgrade').forEach(btn => {
     btn.addEventListener('click', async (e) => {
         const stat = e.target.dataset.stat;
-        const res = await fetch('/api/buyUpgrade', {
+        const res = await fetch(`${API_URL}/api/buyUpgrade`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ stat }),
@@ -502,7 +507,7 @@ document.querySelectorAll('.buy-upgrade').forEach(btn => {
 });
 
 prestigeBtn.addEventListener('click', async () => {
-    const res = await fetch('/api/prestige', {
+    const res = await fetch(`${API_URL}/api/prestige`, {
         method: 'POST',
         credentials: 'include'
     });
@@ -519,7 +524,7 @@ prestigeBtn.addEventListener('click', async () => {
 });
 
 dailyBonusBtn.addEventListener('click', async () => {
-    const res = await fetch('/api/dailyBonus', {
+    const res = await fetch(`${API_URL}/api/dailyBonus`, {
         method: 'POST',
         credentials: 'include'
     });
