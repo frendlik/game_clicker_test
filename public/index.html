@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Clicker</title>
+    <!-- Bootstrap 5 (темная тема) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Кастомный CSS -->
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script defer src="script.js"></script>
+</head>
+<body class="bg-dark text-light">
+    <div class="container-fluid py-3">
+        <!-- Блок авторизации -->
+        <div id="auth" class="card neon-card p-4 mx-auto" style="max-width: 400px;">
+            <h2 class="text-center text-info mb-4"><i class="fas fa-dragon me-2"></i>Neon Clicker</h2>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label text-info">Имя</label>
+                    <input type="text" class="form-control bg-dark text-light border-info" id="username">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-info">Пароль</label>
+                    <input type="password" class="form-control bg-dark text-light border-info" id="password">
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-neon-primary">Войти</button>
+                    <button type="button" id="registerBtn" class="btn btn-neon-secondary">Регистрация</button>
+                </div>
+                <div id="authError" class="text-danger mt-3"></div>
+            </form>
+        </div>
+
+        <!-- Игровой интерфейс (скрыт) -->
+        <div id="game" style="display:none;">
+            <!-- Верхняя информационная панель -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="neon-panel p-2 d-flex flex-wrap align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-circle fa-2x text-info me-2"></i>
+                            <span class="h5 mb-0" id="displayUsername"></span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="neon-badge"><i class="fas fa-gem me-1"></i><span id="crystals">0</span></span>
+                            <span class="neon-badge"><i class="fas fa-crown me-1"></i><span id="influence">0</span></span>
+                            <span class="neon-badge"><i class="fas fa-star me-1"></i>Lv<span id="level">1</span></span>
+                            <span class="neon-badge"><i class="fas fa-flask me-1"></i><span id="exp">0</span></span>
+                            <span class="neon-badge"><i class="fas fa-heart text-danger me-1"></i><span id="health">100</span>/<span id="maxHealth">100</span></span>
+                            <span class="neon-badge"><i class="fas fa-bolt text-warning me-1"></i><span id="energy">5</span>/<span id="maxEnergy">5</span></span>
+                            <span class="neon-badge"><i class="fas fa-fist-raised me-1"></i><span id="attack">0</span></span>
+                            <span class="neon-badge"><i class="fas fa-shield-alt me-1"></i><span id="defense">0</span></span>
+                            <span class="neon-badge"><i class="fas fa-crosshairs me-1"></i><span id="crit">0</span>%</span>
+                            <span class="neon-badge"><i class="fas fa-ghost me-1"></i><span id="dodge">0</span>%</span>
+                            <span class="neon-badge"><i class="fas fa-skull me-1"></i>P<span id="prestige">0</span></span>
+                            <button id="logoutBtn" class="btn btn-sm btn-outline-danger"><i class="fas fa-sign-out-alt"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладки -->
+            <ul class="nav nav-tabs neon-tabs" id="gameTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab"><i class="fas fa-home"></i> Главная</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="upgrades-tab" data-bs-toggle="tab" data-bs-target="#upgrades" type="button" role="tab"><i class="fas fa-chart-line"></i> Улучшения</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="battle-tab" data-bs-toggle="tab" data-bs-target="#battle" type="button" role="tab"><i class="fas fa-swords"></i> Битва</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="shop-tab" data-bs-toggle="tab" data-bs-target="#shop" type="button" role="tab"><i class="fas fa-store"></i> Магазин</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="clan-tab" data-bs-toggle="tab" data-bs-target="#clan" type="button" role="tab"><i class="fas fa-users"></i> Клан</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="achievements-tab" data-bs-toggle="tab" data-bs-target="#achievements" type="button" role="tab"><i class="fas fa-medal"></i> Достижения</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="leaderboard-tab" data-bs-toggle="tab" data-bs-target="#leaderboard" type="button" role="tab"><i class="fas fa-trophy"></i> Рейтинг</button>
+                </li>
+            </ul>
+
+            <!-- Содержимое вкладок -->
+            <div class="tab-content neon-tab-content p-3" id="gameTabsContent">
+                <!-- Главная -->
+                <div class="tab-pane fade show active" id="home" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="neon-card p-3 mb-3 text-center">
+                                <button id="clickBtn" class="btn neon-click-btn">
+                                    <i class="fas fa-hand-pointer fa-3x"></i>
+                                    <span class="d-block mt-2">Клик!</span>
+                                </button>
+                                <p class="mt-2 text-info">+1 кристалл</p>
+                            </div>
+                            <div class="neon-card p-3">
+                                <h5 class="text-info"><i class="fas fa-robot"></i> Автокликеры (каждую секунду)</h5>
+                                <div class="list-group bg-transparent">
+                                    <div class="list-group-item bg-dark text-light border-info d-flex justify-content-between">
+                                        <span><i class="fas fa-robot"></i> Робот (+1/сек)</span>
+                                        <span><span id="autoRobots">0</span> шт.</span>
+                                        <button class="btn btn-sm btn-neon-success buy-auto" data-type="robot">Купить (500)</button>
+                                    </div>
+                                    <div class="list-group-item bg-dark text-light border-info d-flex justify-content-between">
+                                        <span><i class="fas fa-hard-hat"></i> Шахта (+2/сек)</span>
+                                        <span><span id="autoMines">0</span> шт.</span>
+                                        <button class="btn btn-sm btn-neon-success buy-auto" data-type="mine">Купить (2000)</button>
+                                    </div>
+                                    <div class="list-group-item bg-dark text-light border-info d-flex justify-content-between">
+                                        <span><i class="fas fa-tractor"></i> Ферма (+5/сек)</span>
+                                        <span><span id="autoFarms">0</span> шт.</span>
+                                        <button class="btn btn-sm btn-neon-success buy-auto" data-type="farm">Купить (5000)</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="neon-card p-3 mb-3">
+                                <h5 class="text-info"><i class="fas fa-tasks"></i> Ежедневные задания</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item bg-dark text-light border-info d-flex justify-content-between">
+                                        Накликать 500 кристаллов
+                                        <span class="badge bg-info" id="daily1Progress">0/500</span>
+                                    </li>
+                                    <li class="list-group-item bg-dark text-light border-info d-flex justify-content-between">
+                                        Выиграть 3 боя
+                                        <span class="badge bg-info" id="daily2Progress">0/3</span>
+                                    </li>
+                                    <li class="list-group-item bg-dark text-light border-info d-flex justify-content-between">
+                                        Потратить 1000 кристаллов
+                                        <span class="badge bg-info" id="daily3Progress">0/1000</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="neon-card p-3">
+                                <h5 class="text-info"><i class="fas fa-exchange-alt"></i> Перевод кристаллов</h5>
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control bg-dark text-light border-info" id="toUsername" placeholder="Игрок">
+                                    <input type="number" class="form-control bg-dark text-light border-info" id="amount" placeholder="Сумма">
+                                    <button id="transferBtn" class="btn btn-neon-primary">Перевести</button>
+                                </div>
+                                <div id="transferMessage" class="text-info small"></div>
+                                <hr>
+                                <button id="dailyBonusBtn" class="btn btn-neon-warning w-100"><i class="fas fa-gift"></i> Ежедневный бонус (2000 кристаллов)</button>
+                                <div id="bonusMessage" class="text-info small mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Улучшения -->
+                <div class="tab-pane fade" id="upgrades" role="tabpanel">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="neon-card p-3 text-center">
+                                <h6><i class="fas fa-fist-raised"></i> Атака</h6>
+                                <p>Текущий: <span id="attackVal">0</span></p>
+                                <p>Стоимость: <span id="attackCost">300</span></p>
+                                <button class="btn btn-neon-danger buy-upgrade" data-stat="attack">Улучшить</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="neon-card p-3 text-center">
+                                <h6><i class="fas fa-shield-alt"></i> Защита</h6>
+                                <p>Текущий: <span id="defenseVal">0</span></p>
+                                <p>Стоимость: <span id="defenseCost">200</span></p>
+                                <button class="btn btn-neon-primary buy-upgrade" data-stat="defense">Улучшить</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="neon-card p-3 text-center">
+                                <h6><i class="fas fa-crosshairs"></i> Крит</h6>
+                                <p>Текущий: <span id="critVal">0</span>%</p>
+                                <p>Стоимость: <span id="critCost">400</span></p>
+                                <button class="btn btn-neon-warning buy-upgrade" data-stat="crit">Улучшить</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="neon-card p-3 text-center">
+                                <h6><i class="fas fa-ghost"></i> Уклонение</h6>
+                                <p>Текущий: <span id="dodgeVal">0</span>%</p>
+                                <p>Стоимость: <span id="dodgeCost">400</span></p>
+                                <button class="btn btn-neon-info buy-upgrade" data-stat="dodge">Улучшить</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="neon-card p-3 text-center">
+                                <h6><i class="fas fa-heart"></i> Здоровье</h6>
+                                <p>Текущий: <span id="healthVal">100</span></p>
+                                <p>Стоимость: <span id="healthCost">500</span></p>
+                                <button class="btn btn-neon-success buy-upgrade" data-stat="health">Улучшить (+20 HP)</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="neon-card p-3 text-center">
+                                <h6><i class="fas fa-skull"></i> Престиж</h6>
+                                <p>Текущий: <span id="prestigeVal">0</span></p>
+                                <p>Требуется 10 уровень</p>
+                                <button id="prestigeBtn" class="btn btn-neon-purple">Сбросить уровень</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Битва (обновлено) -->
+                <div class="tab-pane fade" id="battle" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="neon-card p-3">
+                                <h5>Выберите противника</h5>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-neon-secondary pvp-btn" data-bot="normal">Обычный бот</button>
+                                    <button class="btn btn-neon-danger pvp-btn" data-bot="tank">Танк</button>
+                                    <button class="btn btn-neon-info pvp-btn" data-bot="rogue">Ловкач</button>
+                                    <button class="btn btn-neon-warning pvp-btn" data-bot="boss">Элитный босс</button>
+                                </div>
+                                <p class="mt-3">Энергия: <span id="battleEnergy">5</span>/5</p>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="neon-card p-3 mb-3">
+                                <h5>Сравнение сил</h5>
+                                <div id="playerVsBot" class="small">Выберите противника</div>
+                                <div id="battleResult" class="h5 mt-2"></div>
+                            </div>
+                            <div class="neon-card p-3">
+                                <h5>Лог боя</h5>
+                                <div id="battleLog" class="neon-log p-2" style="height: 200px; overflow-y: auto;"></div>
+                            </div>
+                            <div class="neon-card p-3 mt-3">
+                                <h5>Состояние боя</h5>
+                                <div class="progress mb-2">
+                                    <div id="botHealthBar" class="progress-bar bg-danger" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100/100</div>
+                                </div>
+                                <div id="botHealthText" class="small text-info">HP противника: </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Магазин -->
+                <div class="tab-pane fade" id="shop" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="neon-card p-3">
+                                <h5>Предметы</h5>
+                                <div id="shopItems" class="list-group"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="neon-card p-3">
+                                <h5>Инвентарь</h5>
+                                <div id="inventory" class="list-group"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Клан (заглушка) -->
+                <div class="tab-pane fade" id="clan" role="tabpanel">
+                    <div class="neon-card p-3">
+                        <h5>Кланы</h5>
+                        <p class="text-muted">Раздел в разработке</p>
+                    </div>
+                </div>
+
+                <!-- Достижения -->
+                <div class="tab-pane fade" id="achievements" role="tabpanel">
+                    <div class="neon-card p-3">
+                        <h5>Достижения</h5>
+                        <div id="achievementsList" class="list-group"></div>
+                    </div>
+                </div>
+
+                <!-- Рейтинг -->
+                <div class="tab-pane fade" id="leaderboard" role="tabpanel">
+                    <div class="neon-card p-3">
+                        <ul class="nav nav-pills mb-3" id="leaderboardPills">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#crystalsTab">По кристаллам</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#influenceTab">По влиянию</button></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="crystalsTab">
+                                <table class="table table-dark table-hover">
+                                    <thead><tr><th>#</th><th>Игрок</th><th>Кристаллы</th><th>Уровень</th><th>Престиж</th><th>Клан</th></tr></thead>
+                                    <tbody id="crystalLeaderboard"></tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane" id="influenceTab">
+                                <table class="table table-dark table-hover">
+                                    <thead><tr><th>#</th><th>Игрок</th><th>Влияние</th><th>Уровень</th><th>Престиж</th><th>Клан</th></tr></thead>
+                                    <tbody id="influenceLeaderboard"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

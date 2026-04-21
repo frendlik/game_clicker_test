@@ -1,0 +1,175 @@
+body {
+    background: #0a0f1e;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0ff;
+}
+
+/* Неоновые карточки */
+.neon-card {
+    background: rgba(10, 20, 40, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid #00f7ff;
+    box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+    border-radius: 15px;
+}
+
+.neon-panel {
+    background: rgba(0, 10, 20, 0.8);
+    border: 1px solid #ff00c6;
+    box-shadow: 0 0 15px rgba(255, 0, 198, 0.5);
+    border-radius: 10px;
+}
+
+.neon-badge {
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid #0ff;
+    padding: 5px 15px;
+    border-radius: 30px;
+    color: #0ff;
+    font-weight: bold;
+    box-shadow: 0 0 10px #0ff;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Кнопки */
+.btn-neon-primary {
+    background: transparent;
+    border: 2px solid #0ff;
+    color: #0ff;
+    text-shadow: 0 0 5px #0ff;
+    transition: all 0.3s;
+}
+.btn-neon-primary:hover {
+    background: #0ff;
+    color: #000;
+    box-shadow: 0 0 20px #0ff;
+}
+
+.btn-neon-secondary {
+    border: 2px solid #ff00c6;
+    color: #ff00c6;
+    text-shadow: 0 0 5px #ff00c6;
+}
+.btn-neon-secondary:hover {
+    background: #ff00c6;
+    color: #000;
+    box-shadow: 0 0 20px #ff00c6;
+}
+
+.btn-neon-success {
+    border: 2px solid #00ff9f;
+    color: #00ff9f;
+}
+.btn-neon-success:hover {
+    background: #00ff9f;
+    color: #000;
+    box-shadow: 0 0 20px #00ff9f;
+}
+
+.btn-neon-warning {
+    border: 2px solid #ffb86b;
+    color: #ffb86b;
+}
+.btn-neon-warning:hover {
+    background: #ffb86b;
+    color: #000;
+    box-shadow: 0 0 20px #ffb86b;
+}
+
+.btn-neon-danger {
+    border: 2px solid #ff5555;
+    color: #ff5555;
+}
+.btn-neon-danger:hover {
+    background: #ff5555;
+    color: #000;
+    box-shadow: 0 0 20px #ff5555;
+}
+
+.btn-neon-info {
+    border: 2px solid #8a2be2;
+    color: #8a2be2;
+}
+.btn-neon-info:hover {
+    background: #8a2be2;
+    color: #000;
+    box-shadow: 0 0 20px #8a2be2;
+}
+
+.btn-neon-purple {
+    border: 2px solid #bf7af0;
+    color: #bf7af0;
+}
+.btn-neon-purple:hover {
+    background: #bf7af0;
+    color: #000;
+    box-shadow: 0 0 20px #bf7af0;
+}
+
+/* Клик-кнопка */
+.neon-click-btn {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffd966, #ff8c00);
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 30px #ffaa00;
+    transition: all 0.1s;
+}
+.neon-click-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 50px #ffaa00;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 20px #ffaa00; }
+    50% { box-shadow: 0 0 40px #ff5500; }
+    100% { box-shadow: 0 0 20px #ffaa00; }
+}
+
+/* Табы */
+.neon-tabs .nav-link {
+    background: transparent;
+    color: #0ff;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.8rem 1rem;
+}
+.neon-tabs .nav-link.active {
+    background: transparent;
+    color: #ff00c6;
+    border-bottom: 2px solid #ff00c6;
+}
+.neon-tab-content {
+    background: rgba(0, 10, 20, 0.7);
+    border: 1px solid #0ff;
+    border-top: none;
+    border-radius: 0 0 15px 15px;
+    min-height: 400px;
+}
+
+/* Лог боя */
+.neon-log {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #0ff;
+    border-radius: 10px;
+    color: #0ff;
+    font-family: 'Courier New', monospace;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .neon-badge {
+        font-size: 0.8rem;
+        padding: 3px 8px;
+    }
+    .neon-click-btn {
+        width: 140px;
+        height: 140px;
+        font-size: 1.5rem;
+    }
+}
